@@ -82,7 +82,6 @@ class App extends Component {
         return res.json();
       })
       .then(resData => {
-        debugger
         if (resData.errors && resData.errors[0].status === 422) {
           throw new Error(
             'Validation failed. Check your credentials'

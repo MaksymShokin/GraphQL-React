@@ -170,7 +170,7 @@ class Feed extends Component {
     })
       .then(res => res.json())
       .then(fileResData => {
-        debugger
+        
         const imageUrl = fileResData.filePath.replace('\\','/');
 
         const graphqlQuery = {

@@ -43,6 +43,7 @@ class Feed extends Component {
   }
 
   loadPosts = direction => {
+    debugger
     if (direction) {
       this.setState({ postsLoading: true, posts: [] });
     }
@@ -59,7 +60,7 @@ class Feed extends Component {
     const graphqlQuery = {
       query: `
         {
-          getPosts {
+          getPosts(page: ${page}) {
             posts {
               _id
               title
@@ -97,7 +98,7 @@ class Feed extends Component {
               imagePath: post.imageUrl
             };
           }),
-          totalPosts: resData.totalItems,
+          totalPosts: resData.data.getPosts.totalPosts,
           postsLoading: false
         });
       })

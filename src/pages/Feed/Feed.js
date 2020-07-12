@@ -55,20 +55,43 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('http://localhost:8080/feed/posts?page=' + page, {
+
+    const graphqlQuery = {
+      query: `
+        {
+          getPosts {
+            posts {
+              _id
+              title
+              content
+              creator {
+                name
+              }
+              createdAt
+            }
+            totalPosts
+          }
+        }
+      `
+    };
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: 'Bearer ' + this.props.token
-      }
+      },
+      body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch posts.');
-        }
         return res.json();
       })
       .then(resData => {
+        if (resData.errors) {
+          throw new Error('Fetching posts failed');
+        }
+
         this.setState({
-          posts: resData.posts.map(post => {
+          posts: resData.data.getPosts.posts.map(post => {
             return {
               ...post,
               imagePath: post.imageUrl
@@ -166,11 +189,8 @@ class Feed extends Component {
         return res.json();
       })
       .then(resData => {
-        debugger
         if (resData.errors && resData.errors[0].status === 422) {
-          throw new Error(
-            'Validation failed. Check your data'
-          );
+          throw new Error('Validation failed. Check your data');
         }
 
         if (resData.errors) {

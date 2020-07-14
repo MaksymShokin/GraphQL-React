@@ -173,7 +173,7 @@ class Feed extends Component {
         let imageUrl;
 
         if (!this.state.editPost) {
-          imageUrl = fileResData.filePath.replace('\\','/');
+          imageUrl = fileResData.filePath.replace('\\', '/');
         }
 
         let graphqlQuery = {
@@ -286,20 +286,32 @@ class Feed extends Component {
 
   deletePostHandler = postId => {
     this.setState({ postsLoading: true });
-    fetch('http://localhost:8080/feed/post/' + postId, {
-      method: 'DELETE',
+
+    const graphqlQuery = {
+      query: `
+        mutation {
+          deletePost(id: "${postId}")
+        }
+      `
+    };
+
+    return fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: 'Bearer ' + this.props.token
-      }
+      },
+      body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Deleting a post failed!');
-        }
         return res.json();
       })
       .then(resData => {
         console.log(resData);
+        if (resData.errors) {
+          throw new Error('Deleting post failed');
+        }
+
         this.loadPosts();
         // this.setState(prevState => {
         //   const updatedPosts = prevState.posts.filter(p => p._id !== postId);
